@@ -1,0 +1,3 @@
+[submodule "platex"]
+	path = platex
+	url = https://github.com/texjporg/platex.git

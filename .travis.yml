@@ -1,0 +1,33 @@
+os:
+  - osx
+install:
+  - curl -L -O http://mirrors.concertpass.com/tex-archive/systems/mac/mactex/BasicTeX.pkg
+  - sudo installer -pkg BasicTeX.pkg -target /
+  - rm BasicTeX.pkg
+  - export PATH=$PATH:/usr/texbin
+  - sudo tlmgr update --self --all
+  - sudo tlmgr install collection-langjapanese collection-fontsrecommended
+script:
+  - cd platex
+  - make clean
+  - make all
+  - cp -r platex.pdf platexrelease.pdf pldoc.pdf nidanfloat.pdf ascmac.pdf exppl2e.pdf ../
+  - cd ../
+after_success:
+  - echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy.key\n" >> ~/.ssh/config
+  - openssl aes-256-cbc -k "$SERVER_KEY" -in deploy_key.enc -d -a -out deploy.key
+  - cp deploy.key ~/.ssh/
+  - chmod 600 ~/.ssh/deploy.key
+  - git config --global user.email "m@yyu.pw"
+  - git config --global user.name "Yoshimura Yuu"
+  - git fetch origin gh-pages:gh-pages
+  - git stash -u
+  - git checkout gh-pages
+  - rm platex.pdf platexrelease.pdf pldoc.pdf nidanfloat.pdf ascmac.pdf exppl2e.pdf
+  - git stash pop
+  - git add platex.pdf platexrelease.pdf pldoc.pdf nidanfloat.pdf ascmac.pdf exppl2e.pdf
+  - git commit -a -m "auto commit on travis $TRAVIS_JOB_NUMBER $TRAVIS_COMMIT"
+  - git push git@github.com:y-yu/platex-documents.git gh-pages:gh-pages
+env:
+  global:
+    secure: IXizDlFrRiNrr4iBrVzDBzWm191Lv8oo/3uAgP//y4XTwiWEhdfCMLTwhx9ULBuesASqhTRwLCk5Xf+q57s/txobf2yvAyEPQTiTsMiY09hE9+8kpN1jH5y3cRCCzUbITuGhvCPO1zeJOk1zEkDtzjGNagBPuOurYsJxB6FkM5vWIU7sHDgdD8dcFGj+3nSIkw5DswpJUvPkvtR+J0sDL/Vbe2tCCdKrsXtRAwSwKYJ7rQLUALhToFuea2jNuzq+spekdP0NPErw6jwXF47/zeNP61UBfgkd+qbUTYW0TpdzS1qLxqXFqhV3w1zqbtd4E8ibSEk6K9fJd8it5aKgbpiHmkIfO0a+LcFfryuDJLZDYCf5cLEZGjYQTjZtE0n4USAzK3pHoaWtHhdwYTdbLwDISfhSkFz9RAo4mtyocA4zE3cTycqIrK78PEG0+K1uyVR3nYVGzi4DWi+F3kIeIBVOWUQYE99kdFea/oOtFKHEbRc1T0LtVPG97/vOZY49urqINNQ7mdULY9O6KD+Xd0gOReMT7EJekI9wIYqGYzFWQRrC+5xkRTa6VplO1al63ylqlrITJ1g1gxiTV6n5BevRCvxRQZl3R7FCauASWPnQqC/az6pf+2ZzmxtRx9izmqwozWtsvLtOafV3IckECyuo7IG/3lUm06RdxvZ7agc=
